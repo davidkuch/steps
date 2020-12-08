@@ -1,0 +1,50 @@
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class LinkedList:
+    def __init__(self, data):
+        self.head = Node(data)
+
+    def add_node(self, data):
+        new_node = Node(data)
+        tmp_node = self.head
+        while tmp_node.next:
+            tmp_node = tmp_node.next
+        tmp_node.next = new_node
+
+    def get_list(self):
+        result = []
+        tmp_node = self.head
+        while tmp_node.next:
+            result.append(tmp_node.data)
+            tmp_node = tmp_node.next
+        result.append(tmp_node.data)
+        return result
+
+    def __add__(self, other):
+        result = LinkedList(self.head.data)
+        tmp_node = self.head
+        while tmp_node.next:
+            result.add_node(tmp_node.data)
+            tmp_node = tmp_node.next
+        tmp_node.next = other.head
+        return  result
+
+
+linked1 = LinkedList(5)
+for i in range(10):
+    linked1.add_node(i)
+print(linked1.get_list())
+linked2 = LinkedList(5)
+for i in range(10,20):
+    linked2.add_node(i)
+print(linked2.get_list())
+linked3 = linked1 + linked2
+print(linked3 is None)
+print(linked1.get_list())
+print(linked1.get_list())
+
