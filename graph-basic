@@ -1,0 +1,122 @@
+# [] that a list
+# {} is a dictionary
+# nodes is a dict, its keywords are nodes, and each node  got
+# a dict as a value, to which edges are added along with their weight.
+# edges- keys, weights- values
+# Nested_dict[dict][key] = 'value'.
+
+
+class Graph:
+    def __init__(self):
+        self.nodes = {}
+        self.edge_count = 0
+
+    def add_node(self, node_name):
+        self.nodes[node_name] = {}
+
+    def add_edge(self, src_node, dst_node):
+        self.nodes[src_node][dst_node] = 0
+        self.nodes[dst_node][src_node] = 0
+
+    def add_directed_edge(self, src_node, dst_node):
+        self.nodes[src_node][dst_node] = 0
+
+    def bfs(self, start_node):
+        bfs_tree = DirectedGraph()
+        bfs_tree.add_node(start_node)
+        queue_list = [start_node]
+        level_count = {start_node: 0}
+        # print("scan starts at:", queue_list[0])
+        while queue_list:
+            for node in self.nodes[queue_list[0]]:
+                if node not in bfs_tree.nodes:
+                    bfs_tree.add_node(node)
+                    bfs_tree.add_edge(queue_list[0], node)
+                    queue_list.append(node)
+                    level_count[node] = level_count[queue_list[0]]+1
+            queue_list = queue_list[1:]
+        # bfs_tree.print_all()
+        # print(level_count)
+        return bfs_tree.nodes, level_count
+
+    def dfs(self, start_node):
+        dfs_tree = DirectedGraph()
+        stack_list = [start_node]
+        visited_list = []
+        dfs_tree.add_node(start_node)
+        while stack_list:
+            flag = False
+            for node in self.nodes[stack_list[-1]]:
+                if node not in visited_list:
+                    flag = True
+                    new_node = node
+            if flag:
+                dfs_tree.add_node(new_node)
+                dfs_tree.add_edge(stack_list[-1], new_node)
+                visited_list.append(new_node)
+                stack_list.append(new_node)
+            if not flag:
+                stack_list = stack_list[:-1]
+        return dfs_tree.nodes
+
+    def print_all(self):
+        for node in self.nodes:
+            print(node)
+            for edge in self.nodes[node]:
+                print("-->", edge)
+
+    def from_file(self, file_name):
+        file = open(file_name, "r")
+        for line in file:
+            line = line.strip()
+            node_name = line[0]
+            self.add_node(node_name)
+            for dst_node in line[1:]:
+                self.add_node(dst_node)
+                self.add_edge(node_name, dst_node)
+
+    def components(self):
+        components_list = [self.dfs("a")]
+        for node in self.nodes:
+            flag = True
+            for component in components_list:
+                if node in component:
+                    flag = False
+            if flag:
+                components_list.append(self.dfs(node))
+        for component in components_list:
+            print(component)
+        return len(components_list)
+
+    def distance(self, src, dst):
+        dist_dict = self.bfs(src)[1]
+        if dst in dist_dict:
+            print(dist_dict[dst])
+        else:
+            print("no such path")
+
+
+
+
+class DirectedGraph(Graph):
+    def add_edge(self, src_node, dst_node):
+        self.nodes[src_node][dst_node] = 0
+
+    def circles(self):
+        pass
+
+
+class WeightGraph(Graph):
+    def add_node(self, node_name, weight):
+        self.nodes[node_name] = {weight}
+
+    def min_cost_path(self, src, dst):
+        pass
+
+
+gr = Graph()
+gr.from_file(r"C:\Users\david\Desktop\input\test1.txt")
+print(gr.bfs("a"))
+
+gr.distance("a","d")
+
