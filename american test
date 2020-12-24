@@ -1,0 +1,45 @@
+# input file format: question begins with big 'Q.'
+#                    answers section starts with big 'A.'
+#                    first answer is the good one, they would be shuffled on output
+#                    between answers: ';'
+# input parsed into: preamble, q&a, last words variants
+# internal format: dict{question 1: list[answers of 1], ...}
+import random
+
+
+class AmericanTest:
+    def __init__(self, path):
+        self.data = self.reader(path)
+        self.copy = self.data.copy()
+        self.corrects = [answer[0] for answer in self.copy.values()]
+
+    def reader(self, path):
+        data = {}
+        file = open(path)
+        raw = file.read()
+        sections = raw.split('Q.')[1:]
+        for section in sections:
+            question, answer_sect = section.split('A.')
+            answers = answer_sect.split(';')
+            data[question] = answers
+        return data
+
+    def show_edited(self):
+        for section in self.data:
+            print(section)
+            random.shuffle(self.data[section])
+            for answer in self.data[section]:
+                print(answer)
+
+    def show_raw(self):
+        print(self.data)
+
+    def show_safe(self):
+        print(self.corrects)
+
+
+path = r'C:\Users\david\Desktop\input\test1.txt'
+test1 = AmericanTest(path)
+test1.show_edited()
+test1.show_raw()
+test1.show_safe()
