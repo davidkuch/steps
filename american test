@@ -5,31 +5,38 @@
 # input parsed into: preamble, q&a, last words variants
 # internal format: dict{question 1: list[answers of 1], ...}
 import random
+import docx2txt
 
 
 class AmericanTest:
     def __init__(self, path):
-        self.data = self.reader(path)
+        self.data = self.word_reader(path)
         self.copy = self.data.copy()
-        self.corrects = [answer[0] for answer in self.copy.values()]
+        self.corrects = {question: answer[0] for question, answer in zip(self.data.copy(), self.copy.values())}
+        self.answers = []
 
-    def reader(self, path):
+    def word_reader(self, path):
         data = {}
-        file = open(path)
-        raw = file.read()
-        sections = raw.split('Q.')[1:]
+        file = docx2txt.process(path)
+        sections = file.split('Q.')[1:]
         for section in sections:
             question, answer_sect = section.split('A.')
             answers = answer_sect.split(';')
             data[question] = answers
         return data
 
-    def show_edited(self):
-        for section in self.data:
-            print(section)
-            random.shuffle(self.data[section])
-            for answer in self.data[section]:
-                print(answer)
+    def present(self):
+        for question in self.data:
+            print(question)
+            random.shuffle(self.data[question])
+            print('\n'.join('{}: {}'.format(*k) for k in enumerate(self.data[question], start=1)))
+            answer = int(input("you answer: 1/2/3..."))-1
+            if 0 <= answer <= len(self.data[question]):
+                if self.data[question][answer] == self.corrects[question]:
+                    self.answers.append(answer)
+
+    def evaluate(self):
+        print("you have being right in "+str(len(self.answers))+"time3 out of"+str(len(self.corrects)))
 
     def show_raw(self):
         print(self.data)
@@ -38,8 +45,7 @@ class AmericanTest:
         print(self.corrects)
 
 
-path = r'C:\Users\david\Desktop\input\test1.txt'
+path = r'C:\Users\david\Desktop\input\test.docx'
 test1 = AmericanTest(path)
-test1.show_edited()
-test1.show_raw()
-test1.show_safe()
+test1.present()
+test1.evaluate()
