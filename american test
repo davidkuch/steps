@@ -6,6 +6,7 @@
 # internal format: dict{question 1: list[answers of 1], ...}
 import random
 import docx2txt
+import psycopg2
 
 
 class AmericanTest:
@@ -14,6 +15,7 @@ class AmericanTest:
         self.copy = self.data.copy()
         self.corrects = {question: answer[0] for question, answer in zip(self.data.copy(), self.copy.values())}
         self.answers = []
+        self.id = {}
 
     def word_reader(self, path):
         data = {}
@@ -25,7 +27,12 @@ class AmericanTest:
             data[question] = answers
         return data
 
-    def present(self):
+    def welcome(self):
+        print("welcome to American-Test!")
+        self.id['name'] = input("please enter your name")
+        self.id['age'] = input("please enter your age")
+
+    def test(self):
         for question in self.data:
             print(question)
             random.shuffle(self.data[question])
@@ -36,7 +43,23 @@ class AmericanTest:
                     self.answers.append(answer)
 
     def evaluate(self):
-        print("you have being right in "+str(len(self.answers))+"time3 out of"+str(len(self.corrects)))
+        print(f" {self.id['name']}!you have being right in "+str(len(self.answers))
+              + " times out of"+str(len(self.corrects)))
+
+    def save(self):
+        con = psycopg2.connect(database="postgres", user="postgres", password="tbhsuseumr1", host="127.0.0.1", port="5432")
+        print("connected to db")
+        cur = con.cursor()
+        cur.execute(f"insert into test1 (name, age , score) values('{self.id['name']}',{self.id['age']},{len(self.answers)});")
+        print("data added")
+        con.commit()
+        con.close()
+
+    def run(self):
+        self.welcome()
+        self.test()
+        self.evaluate()
+        self.save()
 
     def show_raw(self):
         print(self.data)
@@ -44,8 +67,33 @@ class AmericanTest:
     def show_safe(self):
         print(self.corrects)
 
+    def make_db(self):
+        con = psycopg2.connect(database="postgres", user="postgres", password="tbhsuseumr1", host="127.0.0.1", port="5432")
+        print("connected to db")
+        cur = con.cursor()
+        cur.execute('CREATE TABLE test1 ('
+                    'name varchar(35) primary key,'
+                    'age integer,'
+                    'score integer)')
+        cur.close()
+        con.commit()
+        print("db created")
+
+    def read_db(self):
+        con = psycopg2.connect(database="postgres", user="postgres", password="tbhsuseumr1", host="127.0.0.1",
+                               port="5432")
+        print("connected to db")
+        cur = con.cursor()
+        cur.execute('select * from test1')
+        rows = cur.fetchall()
+        for row in rows:
+            print(row)
+        cur.close()
+
 
 path = r'C:\Users\david\Desktop\input\test.docx'
 test1 = AmericanTest(path)
-test1.present()
-test1.evaluate()
+# make_db()
+test1.run()
+test1.read_db()
+
